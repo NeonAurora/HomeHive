@@ -18,6 +18,7 @@ import { GrMapLocation } from "react-icons/gr";
 import Map from "../../components/Map/Map";
 import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { UserContext } from "../../utils/UserContext";
+import { transformResidencyData } from "../../utils/residencyValidation";
 
 const Property = () => {
   const { pathname } = useLocation();
@@ -51,13 +52,25 @@ const Property = () => {
   // 5) Save changes to the server
   const handleSave = async () => {
     try {
-      const updated = await updateProperty(propertyData.id, propertyData);
-      // Replace local state with updated data
+      // 1) Merge property fields + user object
+      const rawUpdateData = {
+        ...propertyData,
+        currentUser,
+      };
+
+      // 2) Validate & convert
+      const finalUpdateData = transformResidencyData(rawUpdateData);
+
+      // 3) Send to API
+      const updated = await updateProperty(propertyData.id, finalUpdateData);
+
+      // 4) Update local state
       setPropertyData(updated);
       setEditMode(false);
       console.log("Property updated successfully!");
     } catch (err) {
       console.error("Error updating property:", err);
+      alert(`Validation Error: ${err.message}`); // or toast.error
     }
   };
 

@@ -77,7 +77,7 @@ export const loginUser = async (loginData) => {
 export const updateProperty = async (id, updatedData) => {
   try {
     // PUT request to /residency/:id
-    const response = await api.put(`/residency/${id}`, updatedData, {
+    const response = await api.put(`/residency/update/${id}`, updatedData, {
       timeout: 10000,
     });
 
