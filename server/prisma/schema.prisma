@@ -1,0 +1,96 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url = env("DATABASE_URL")
+}
+
+model User {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  name             String?
+  email            String      @unique
+  image            String?
+  favResidenciesID String[]    @db.ObjectId
+  ownedResidencies Residency[] @relation("Owner")
+
+  // Add a plain-text password field
+  password         String?
+
+  role             Role        @default(USER)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Residency {
+    id               String @id @default(auto()) @map("_id") @db.ObjectId
+    ownerid          Int
+    title            String
+    description      String
+    address          String
+    zip              String
+    city             String
+    county           String
+    state            String
+    image            String
+    askingPrice      Float
+    minPrice         Float
+    facilities       Json
+    userEmail        String
+    status           String
+    flyer            String
+    propertyAddress  String
+    apnOrPin         String
+    sqft             Int
+    acre             Float
+    zoning           String
+    utilities        Json
+    roadCondition    String
+    restrictions     String
+    mobileHomeFriendly Boolean
+    hoaPoa           String
+    floodplain       String
+    hoaDeedDevInfo   String?
+    notes            String?
+    owner            User @relation("Owner", fields: [userEmail], references: [email])
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+
+    @@unique(fields: [address, userEmail])
+
+}
+
+model Offer {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    propertyId  String
+    offeredPrice Float
+    timestamp   DateTime @default(now())
+    buyerId     String
+    buyer       Buyer    @relation("BuyerOffers", fields: [buyerId], references: [id])
+}
+
+model Buyer {
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    email      String   @unique
+    phone      String   @unique
+    buyerType  BuyerType
+    firstName  String
+    lastName   String
+    offers     Offer[] @relation("BuyerOffers")
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+}
+
+enum BuyerType {
+    EndBuyer
+    Builder
+    Developer
+    Agent
+    Investor
+    Wholesaler
+} 
+
